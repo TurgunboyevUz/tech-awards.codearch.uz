@@ -2,14 +2,15 @@
 
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\CorsMiddleware;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('user')->controller(UserController::class)->group(function () {
+Route::prefix('user')->middleware(CorsMiddleware::class)->controller(UserController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('/login', 'login');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', CorsMiddleware::class])->group(function () {
 
     Route::prefix('user')->controller(UserController::class)->group(function () {
         Route::put('/update', 'update');

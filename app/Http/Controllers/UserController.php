@@ -10,6 +10,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 #[Group('Foydalanuvchilar', weight: 0)]
@@ -19,43 +20,43 @@ class UserController extends Controller
 
     /**
      * Ro'yxatdan o'tish
-     * 
+     *
      * @unauthenticated
      */
     public function register(Request $request)
     {
         $data = $request->validate([
+            // Foydalanuvchi ismi
             'name'     => 'required',
+
+            // Foydalanuvchi emaili
             'email'    => 'required|email|unique:users',
+
+            // Foydalanuvchi paroli
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $otp  = config('app.env') == 'local' ? 123456 : mt_rand(100000, 999999);
         $user = User::create([
-            'name'           => $data['name'],
-            'email'          => $data['email'],
-            'password'       => bcrypt($data['password']),
-
-            'otp_code'       => $otp,
-            'otp_expires_at' => now()->addMinutes(5),
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
         ]);
 
-        Mail::to($user->email)->send(new EmailOtpMail($otp));
-
-        return $this->success([
-            'expires_at' => $user->otp_expires_at,
-        ], 'User created successfully, please verify your email', Response::HTTP_CREATED);
+        return $this->success([], 'User registered successfully', Response::HTTP_OK);
     }
 
     /**
      * Kirish
-     * 
+     *
      * @unauthenticated
      */
     public function login(Request $request)
     {
         $data = $request->validate([
+            // Foydalanuvchi emaili
             'email'    => 'required|email',
+
+            // Foydalanuvchi paroli
             'password' => 'required',
         ]);
 
@@ -65,11 +66,7 @@ class UserController extends Controller
             return $this->error('User not found', Response::HTTP_NOT_FOUND);
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            return $this->error('Email not verified', Response::HTTP_CONFLICT);
-        }
-
-        if (! auth()->attempt($data)) {
+        if (! Auth::attempt($data)) {
             return $this->error('Invalid credentials', Response::HTTP_UNAUTHORIZED);
         }
 
@@ -96,8 +93,13 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            // Foydalanuvchi ismi
             'name'     => 'nullable|string',
+
+            // Foydalanuvchi emaili
             'email'    => 'nullable|email',
+
+            // Foydalanuvchi paroli
             'password' => 'nullable|min:8|confirmed',
         ]);
 
@@ -105,20 +107,7 @@ class UserController extends Controller
 
         $user->name     = $request->name ?? $user->name;
         $user->email    = $request->email ?? $user->email;
-        $user->password = $request->password ? bcrypt($request->password) : $user->password;
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-            $user->otp_code          = config('app.env') == 'local' ? 123456 : mt_rand(100000, 999999);
-            $user->otp_expires_at    = now()->addMinutes(5);
-
-            Mail::to($user->email)->send(new EmailOtpMail($user->otp_code));
-
-            return $this->success([
-                'expires_at' => $user->otp_expires_at,
-            ], 'User updated successfully, please verify your email', Response::HTTP_OK);
-        }
-
+        $user->password = $request->password ? Hash::make($request->password) : $user->password;
         $user->save();
 
         return $this->success(new UserResource($user), 'User updated successfully', Response::HTTP_OK);
@@ -130,93 +119,5 @@ class UserController extends Controller
     public function user(Request $request)
     {
         return $this->success(new UserResource($request->user()), '', Response::HTTP_OK);
-    }
-
-    /**
-     * Emailni tasdiqlash
-     */
-    public function verify(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'otp'   => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user) {
-            return $this->error('User not found', Response::HTTP_NOT_FOUND);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return $this->error('Email already verified', Response::HTTP_CONFLICT);
-        }
-
-        if ($user->otp_expires_at < now()) {
-            return $this->error('OTP expired', Response::HTTP_CONFLICT);
-        }
-
-        if ($user->otp_code != $request->otp) {
-            return $this->error('Invalid OTP', Response::HTTP_CONFLICT);
-        }
-
-        $user->markEmailAsVerified();
-
-        return $this->success([], 'Email verified successfully', Response::HTTP_OK);
-    }
-
-    /**
-     * OTPni qayta yuborish
-     */
-    public function resendOtp(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user) {
-            return $this->error('User not found', Response::HTTP_NOT_FOUND);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return $this->error('Email already verified', Response::HTTP_CONFLICT);
-        }
-
-        $otp = config('app.env') == 'local' ? 123456 : mt_rand(100000, 999999);
-        $user->update([
-            'otp_code'       => $otp,
-            'otp_expires_at' => now()->addMinutes(5),
-        ]);
-
-        Mail::to($user->email)->send(new EmailOtpMail($otp));
-
-        return $this->success([
-            'expires_at' => $user->otp_expires_at,
-        ], 'OTP resent successfully', Response::HTTP_OK);
-    }
-
-    /**
-     * Hisobni to'ldirish
-     */
-    public function topup(Request $request)
-    {
-        $data = $request->validate([
-            'amount'      => 'required|numeric',
-            'currency_id' => 'required|exists:currencies,id',
-        ]);
-
-        $currency = Currency::find($data['currency_id']);
-
-        $user        = $request->user();
-        $transaction = $user->createMirpayTransaction($data['amount'], $currency . ' sotib olish uchun to\'lov');
-
-        return $this->success([
-            'amount'   => $data['amount'],
-            'currency' => $currency,
-            'currency_amount' => $data['amount'] / $currency->exchange_rate,
-            'url'      => $transaction->redirect_url,
-        ]);
     }
 }

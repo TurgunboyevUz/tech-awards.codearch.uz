@@ -14,6 +14,18 @@ class CurrencyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            // valyuta id raqami
+            'id' => $this->id,
+
+            // valyuta nomi
+            'name' => $this->name,
+
+            // valyuta symboli (qisqartma, masalan: dollar - $)
+            'symbol' => $this->symbol,
+
+            // valyuta kursi (so'mda)(masalan: 1 dollar = 12500 so'm)
+            'exchange_rate' => $this->exchange_rate
+        ];
     }
 }

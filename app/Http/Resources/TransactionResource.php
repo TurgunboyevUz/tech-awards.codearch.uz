@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class TransactionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,17 +15,17 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            // foydalanuvchi id raqami
+            // to'lov id raqami
             'id' => $this->id,
 
-            // foydalanuvchi nomi
-            'name' => $this->name,
+            // to'lov miqdori
+            'amount' => $this->amount,
 
-            // foydalanuvchi emaili
-            'email' => $this->email,
+            // 0 - jarayonda, 1 - to'langan, 2 - bekor qilingan
+            'state' => $this->state,
 
-            // foydalanuvchi balansi
-            'balance' => $this->balance,
+            // to'lov qilgan foydalanuvchi
+            'user' => new UserResource($this->payable)
         ];
     }
 }

@@ -20,4 +20,21 @@ class CurrencyController extends Controller
     {
         return $this->success(CurrencyResource::collection(Currency::all()), '', Response::HTTP_OK);
     }
+
+    /**
+     * Hisoblash (konvertatsiya)
+     */
+    public function calculate(Request $request)
+    {
+        $data = $request->validate([
+            'amount' => 'required|numeric',
+            'currency' => 'required|exists:currencies,id',
+        ]);
+
+        $currency = Currency::find($data['currency']);
+
+        return $this->success([
+            'converted_amount' => $data['amount'] / $currency->exchange_rate
+        ]);
+    }
 }

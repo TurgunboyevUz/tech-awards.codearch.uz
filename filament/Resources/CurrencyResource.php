@@ -58,7 +58,7 @@ class CurrencyResource extends Resource
                     ->label('Simvoli')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('exchange_rate')
-                    ->label('Kurs')
+                    ->label('Kurs (so\'mda)')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

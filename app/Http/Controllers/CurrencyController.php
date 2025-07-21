@@ -15,6 +15,8 @@ class CurrencyController extends Controller
 
     /**
      * Ro'yxatni olish
+     * 
+     * @unauthenticated
      */
     public function get(Request $request)
     {
@@ -23,6 +25,8 @@ class CurrencyController extends Controller
 
     /**
      * Hisoblash (konvertatsiya)
+     * 
+     * @unauthenticated
      */
     public function calculate(Request $request)
     {

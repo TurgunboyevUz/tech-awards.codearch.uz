@@ -11,14 +11,4 @@ class Convertation extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function fromCurrency()
-    {
-        return $this->belongsTo(Currency::class, 'from_currency_id');
-    }
-
-    public function toCurrency()
-    {
-        return $this->belongsTo(Currency::class, 'to_currency_id');
-    }
 }

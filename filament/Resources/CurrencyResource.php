@@ -19,7 +19,7 @@ class CurrencyResource extends Resource
 
     protected static ?string $navigationLabel = 'Valyutalar';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
@@ -60,16 +60,6 @@ class CurrencyResource extends Resource
                     ->label('Sotib olish kursi')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Yaratilgan vaqti')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Yangilangan vaqti')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -77,7 +67,8 @@ class CurrencyResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([]);
+            ->bulkActions([])
+            ->recordUrl(null);
     }
 
     public static function getRelations(): array

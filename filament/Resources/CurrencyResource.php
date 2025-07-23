@@ -1,17 +1,13 @@
 <?php
-
 namespace Filament\Resources;
 
-use Filament\Resources\CurrencyResource\Pages;
-use Filament\Resources\CurrencyResource\RelationManagers;
 use App\Models\Currency;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\CurrencyResource\Pages;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CurrencyResource extends Resource
 {
@@ -35,15 +31,14 @@ class CurrencyResource extends Resource
                     ->label('Ismi')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('symbol')
-                    ->label('Simvoli')
+                Forms\Components\TextInput::make('buy_price')
+                    ->label('Sotilish kursi')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('exchange_rate')
-                    ->label('Kurs')
+                    ->numeric(),
+                Forms\Components\TextInput::make('sell_price')
+                    ->label('Sotib olish kursi')
                     ->required()
-                    ->numeric()
-                    ->default(1.00),
+                    ->numeric(),
             ]);
     }
 
@@ -54,11 +49,15 @@ class CurrencyResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Ismi')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('symbol')
+                Tables\Columns\TextColumn::make('code')
                     ->label('Simvoli')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('exchange_rate')
-                    ->label('Kurs (so\'mda)')
+                Tables\Columns\TextColumn::make('buy_price')
+                    ->label('Sotilish kursi')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('sell_price')
+                    ->label('Sotib olish kursi')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -77,13 +76,8 @@ class CurrencyResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
@@ -96,9 +90,9 @@ class CurrencyResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCurrencies::route('/'),
+            'index'  => Pages\ListCurrencies::route('/'),
             'create' => Pages\CreateCurrency::route('/create'),
-            'edit' => Pages\EditCurrency::route('/{record}/edit'),
+            'edit'   => Pages\EditCurrency::route('/{record}/edit'),
         ];
     }
 }

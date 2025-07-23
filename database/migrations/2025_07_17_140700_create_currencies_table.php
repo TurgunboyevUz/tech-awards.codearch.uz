@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('symbol');
-            $table->decimal('exchange_rate', 15, 2)->default(1);
+            $table->string('code');
+            $table->string('image')->nullable();
+            $table->decimal('buy_price', 15, 2); // foydalanuvchi sotib oladi
+            $table->decimal('sell_price', 15, 2); // foydalanuvchi sotadi
             $table->timestamps();
         });
     }

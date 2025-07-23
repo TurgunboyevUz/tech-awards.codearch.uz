@@ -21,11 +21,14 @@ class CurrencyResource extends JsonResource
             // valyuta nomi
             'name' => $this->name,
 
-            // valyuta symboli (qisqartma, masalan: dollar - $)
-            'symbol' => $this->symbol,
+            // valyuta kodi
+            'code' => $this->code,
 
-            // valyuta kursi (so'mda)(masalan: 1 dollar = 12500 so'm)
-            'exchange_rate' => $this->exchange_rate
+            // foydalanuvchi sotib olish kursi
+            'buy_price' => $this->buy_price,
+
+            // foydalanuvchi sotish kursi
+            'sell_price' => $this->sell_price
         ];
     }
 }

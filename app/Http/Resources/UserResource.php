@@ -25,7 +25,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
 
             // foydalanuvchi balansi
-            'balance' => $this->balance,
+            'balance' => round($this->balance, 6),
         ];
     }
 }

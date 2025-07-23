@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\ConvertationController;
 use App\Http\Controllers\CurrencyController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CorsMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -18,13 +18,12 @@ Route::middleware(['auth:sanctum', CorsMiddleware::class])->group(function () {
         Route::post('logout', 'logout')->name('user.logout');
     });
 
-    Route::prefix('payment')->controller(PaymentController::class)->group(function () {
-        Route::post('create', 'create')->name('payment.create');
-        Route::get('transactions', 'transactions')->name('payment.transactions');
-    });
-});
+    Route::withoutMiddleware('auth:sanctum')->get('currency', [CurrencyController::class, 'get'])->name('currency.get');
 
-Route::prefix('currency')->controller(CurrencyController::class)->group(function () {
-    Route::get('/', 'get')->name('currency.get');
-    Route::get('/calculate', 'calculate')->name('currency.calculate');
+    Route::prefix('convertation')->controller(ConvertationController::class)->group(function () {
+        Route::get('/', 'get')->name('converatation.get');
+        Route::post('buy', 'buy')->name('converatation.buy');
+        Route::post('sell', 'sell')->name('converatation.sell');
+        Route::post('calculate', 'calculate')->name('converatation.calculate');
+    });
 });
